@@ -126,7 +126,7 @@ public:
 }; // ClassPolicy
 
 /// policy for individuals
-template<bool plain>
+template <bool plain>
 class IndividualPolicy
 {
 public:

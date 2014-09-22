@@ -79,7 +79,7 @@ public:		// classification interface
 
 protected:	// methods
 		/// apply ACTOR to subgraph starting from NODE as defined by flags
-	template<bool onlyDirect, bool upDirection, class Actor>
+	template <bool onlyDirect, bool upDirection, class Actor>
 	void getRelativesInfoRec ( TaxonomyVertex* node, Actor& actor )
 	{
 		// recursive applicability checking
@@ -136,7 +136,7 @@ public:		// interface
 	void setCurrent ( TaxonomyVertex* cur ) { Current = cur; }
 
 		/// apply ACTOR to subgraph starting from NODE as defined by flags;
-	template<bool needCurrent, bool onlyDirect, bool upDirection, class Actor>
+	template <bool needCurrent, bool onlyDirect, bool upDirection, class Actor>
 	void getRelativesInfo ( TaxonomyVertex* node, Actor& actor )
 	{
 		// if current node processed OK and there is no need to continue -- exit

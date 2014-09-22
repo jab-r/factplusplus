@@ -37,6 +37,8 @@ std::ofstream Out;
 
 // defined in AD.cpp
 void CreateAD ( TOntology* O, ModuleMethod moduleMethod );
+// defined in QA.cpp
+void doQueryAnswering ( ReasoningKernel& Kernel );
 
 // local methods
 inline void Usage ( void )
@@ -271,7 +273,8 @@ int main ( int argc, char *argv[] )
 		LL << "Init testTimeout = " << testTimeout << "\n";
 
 	// init undefined names
-	Kernel.setUseUndefinedNames(false);
+	bool queryAnswering = Kernel.getOptions()->getBool("queryAnswering");
+	Kernel.setUseUndefinedNames(queryAnswering);
 
 	// dump ontology if requested
 	Kernel.setDumpOntology(Kernel.getOptions()->getBool("dumpOntology"));
@@ -326,7 +329,12 @@ int main ( int argc, char *argv[] )
 	if ( !Kernel.isKBConsistent() )
 		std::cerr << "WARNING: KB is inconsistent. Query is NOT processed\n";
 	else	// perform reasoning
-		doReasoningQuery();
+	{
+		if ( queryAnswering )
+			doQueryAnswering(Kernel);
+		else
+			doReasoningQuery();
+	}
 
 	pt.Stop();
 

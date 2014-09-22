@@ -13,6 +13,9 @@ set(SOURCE_FILES
 	ConceptWithDep.h
 	configure.cpp
 	configure.h
+	ConjunctiveQuery.cpp
+	ConjunctiveQueryFolding.cpp
+	ConjunctiveQuerySet.h
 	counter.h
 	cpm.h
 	cppi.h
@@ -91,6 +94,7 @@ set(SOURCE_FILES
 	PriorityMatrix.h
 	procTimer.h
 	ProgressIndicatorInterface.h
+	QR.h
 	RAutomaton.cpp
 	RAutomaton.h
 	Reasoner.cpp
