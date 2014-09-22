@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Kernel.h"
 #include "tOntologyLoader.h"
 #include "tOntologyPrinterLISP.h"
+#include "AxiomSplitter.h"
 #include "AtomicDecomposer.h"
 #include "OntologyBasedModularizer.h"
 #include "eFPPSaveLoad.h"
@@ -55,6 +56,7 @@ ReasoningKernel :: ReasoningKernel ( void )
 	, cachedQueryTree(nullptr)
 	, reasoningFailed(false)
 	, NeedTracing(false)
+	, useAxiomSplitting(false)
 	, ignoreExprCache(false)
 	, useIncrementalReasoning(false)
 	, dumpOntology(false)
@@ -133,6 +135,13 @@ ReasoningKernel :: forceReload ( void )
 	// Protege (as the only user of non-trivial monitors with reload) does not accept multiple usage of a monitor
 	// so switch it off after the 1st usage
 	pMonitor = nullptr;
+
+	// split ontological axioms
+	if ( useAxiomSplitting )
+	{
+		TAxiomSplitter AxiomSplitter(&Ontology);
+		AxiomSplitter.buildSplit();
+	}
 
 	// (re)load ontology
 	TOntologyLoader OntologyLoader(*getTBox());
@@ -892,6 +901,15 @@ bool ReasoningKernel :: initOptions ( void )
 	if ( KernelOptions.RegisterOption (
 		"allowUndefinedNames",
 		"Option 'allowUndefinedNames' describes the policy of undefined names.",
+		ifOption::iotBool,
+		"true"
+		) )
+		return true;
+
+	// register "useAxiomSplitting" option (22/09/2014)
+	if ( KernelOptions.RegisterOption (
+		"useAxiomSplitting",
+		"Option 'useAxiomSplitting', if true, force reasoner to split name A in case A=B and A[=C present in the KB.",
 		ifOption::iotBool,
 		"true"
 		) )

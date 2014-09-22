@@ -45,6 +45,13 @@ bool DLConceptTaxonomy :: testSub ( const TConcept* p, const TConcept* q )
 		 && !q->isNominal() )	// nominals should be classified as usual concepts
 		return false;
 
+	if ( unlikely(inSplitCheck) )
+	{
+		if ( q->isPrimitive() )	// only defined ones in split checks
+			return false;
+		return testSubTBox ( p, q );
+	}
+
 	if ( LLM.isWritable(llTaxTrying) )
 		LL << "\nTAX: trying '" << p->getName() << "' [= '" << q->getName() << "'... ";
 
@@ -302,6 +309,73 @@ DLConceptTaxonomy :: classifySynonym ( void )
 	return false;
 }
 
+void
+DLConceptTaxonomy :: checkExtraParents ( void )
+{
+	inSplitCheck = true;
+	TaxonomyVertex::iterator p, p_end;
+	TaxonomyVertex* Current = pTax->getCurrent();
+	for ( p = Current->begin(/*upDirection=*/true), p_end = Current->end(/*upDirection=*/true); p != p_end; ++p )
+		propagateTrueUp(*p);
+	Current->clearLinks(/*upDirection=*/true);
+	runTopDown();
+	// save all indirect parents to remove them later (to avoid iterator invalidation)
+	TaxVertexVec vec;
+	for ( p = Current->begin(/*upDirection=*/true), p_end = Current->end(/*upDirection=*/true); p != p_end; ++p )
+		if ( !isDirectParent(*p) )
+			vec.push_back(*p);
+	// now it is time to remove links
+	for ( TaxVertexVec::iterator q = vec.begin(), q_end = vec.end(); q != q_end; ++q )
+	{
+		(*q)->removeLink ( /*upDirection=*/false, Current );
+		Current->removeLink ( /*upDirection=*/true, *q );
+	}
+
+	clearLabels();
+	inSplitCheck = false;
+}
+
+/// merge vars came from a given SPLIT together
+void
+DLConceptTaxonomy :: mergeSplitVars ( TSplitVar* split )
+{
+	typedef std::set<TaxonomyVertex*> TVSet1;
+
+	TVSet1 splitVertices;
+	TaxonomyVertex* v = split->C->getTaxVertex();
+	bool cIn = ( v != NULL );
+	if ( cIn )	// there is C-node in the taxonomy
+		splitVertices.insert(v);
+	TSplitVar::iterator q = split->begin(), q_end = split->end();
+	for ( ; q != q_end; ++q )
+		splitVertices.insert(q->C->getTaxVertex());
+	// set V to be a node-to-add
+	// FIXME!! check later the case whether both TOP and BOT are there
+	TaxonomyVertex* bot = pTax->getBottomVertex();
+	TaxonomyVertex* top = pTax->getTopVertex();
+	TaxonomyVertex* cur = pTax->getCurrent();
+
+	if ( splitVertices.count(bot) > 0 )
+		v = bot;
+	else if ( splitVertices.count(top) > 0 )
+		v = top;
+	else
+	{
+		setCurrentEntry(split->C);
+		v = cur;
+	}
+
+	if ( v != cur && !cIn )
+		v->addSynonym(split->C);
+	for ( TVSet1::iterator p = splitVertices.begin(), p_end = splitVertices.end(); p != p_end; ++p )
+		mergeVertex ( v, *p, splitVertices );
+	if ( v == cur )
+	{
+		checkExtraParents();
+		pTax->finishCurrentNode();
+	}
+}
+
 void 		/// fill candidates
 DLConceptTaxonomy :: fillCandidates ( TaxonomyVertex* cur )
 {
@@ -487,12 +561,18 @@ void TBox :: createTaxonomy ( bool needIndividual )
 		pTaxCreator->setProgressIndicator(pMonitor);
 	}
 
+	duringClassification = true;
+
 //	sort ( arrayCD.begin(), arrayCD.end(), TSDepthCompare() );
 	classifyConcepts ( arrayCD, true, "completely defined" );
 //	sort ( arrayNoCD.begin(), arrayNoCD.end(), TSDepthCompare() );
 	classifyConcepts ( arrayNoCD, false, "regular" );
 //	sort ( arrayNP.begin(), arrayNP.end(), TSDepthCompare() );
 	classifyConcepts ( arrayNP, false, "non-primitive" );
+
+	duringClassification = false ;
+
+	pTaxCreator->processSplits();
 
 	if ( pMonitor )
 	{

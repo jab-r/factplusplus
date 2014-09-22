@@ -54,7 +54,8 @@ TDag2Interface :: buildCExpr ( const DLVertex& v )
 		return Manager->Not(Manager->SelfReference(ORName(v.getRole())));
 	case dtProj:
 	case dtNN:
-	case dtChoose:	// these are artificial constructions and shouldn't be visible
+	case dtChoose:
+	case dtSplitConcept:	// these are artificial constructions and shouldn't be visible
 		return Manager->Top();
 	default:
 		fpp_unreachable();

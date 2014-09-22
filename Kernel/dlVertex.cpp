@@ -137,6 +137,7 @@ const char* DLVertex :: getTagName ( void ) const
 	case dtPConcept:return "primconcept";
 	case dtPSingleton:return "prim-singleton";
 	case dtNSingleton:return "singleton";
+	case dtSplitConcept:return "split-concept";
 	case dtDataType: return "data-type";
 	case dtDataValue: return "data-value";
 	case dtDataExpr: return "data-expr";
@@ -165,6 +166,7 @@ DLVertex :: Print ( std::ostream& o ) const
 	switch ( Type() )
 	{
 	case dtAnd:		// nothing to do (except for printing operands)
+	case dtSplitConcept:
 		break;
 
 	case dtTop:		// nothing to do

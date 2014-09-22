@@ -85,6 +85,32 @@ TaxonomyVertex :: removeLinks ( bool upDirection )
 	clearLinks(upDirection);
 }
 
+/// merge NODE which is independent to THIS
+void
+TaxonomyVertex :: mergeIndepNode ( TaxonomyVertex* node, const std::set<TaxonomyVertex*>& excludes, const ClassifiableEntry* curEntry )
+{
+	// copy synonyms here
+	if ( node->getPrimer() != curEntry )
+		addSynonym(node->getPrimer());
+	for ( const auto* syn: synonyms() )
+		addSynonym(syn);
+	bool upDirection = true;
+	iterator p, p_end;
+	for ( p = node->begin(upDirection), p_end = node->end(upDirection); p != p_end; ++p )
+	{
+		if ( excludes.count(*p) == 0 )
+			addNeighbour ( upDirection, *p );
+		(*p)->removeLink ( !upDirection, node );
+	}
+	upDirection = false;
+	for ( p = node->begin(upDirection), p_end = node->end(upDirection); p != p_end; ++p )
+	{
+		if ( excludes.count(*p) == 0 )
+			addNeighbour ( upDirection, *p );
+		(*p)->removeLink ( !upDirection, node );
+	}
+}
+
 void TaxonomyVertex :: printSynonyms ( std::ostream& o ) const
 {
 	fpp_assert ( sample != nullptr );

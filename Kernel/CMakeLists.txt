@@ -5,6 +5,7 @@ set(SOURCE_FILES
 	Actor.h
 	AtomicDecomposer.cpp
 	AtomicDecomposer.h
+	AxiomSplitter.h
 	BiPointer.h
 	Blocking.cpp
 	BuildDAG.cpp
@@ -165,6 +166,9 @@ set(SOURCE_FILES
 	tSetAsTree.h
 	tSignature.h
 	tSignatureUpdater.h
+	tSplitExpansionRules.cpp
+	tSplitExpansionRules.h
+	tSplitVars.h
 	tsttree.h
 	WalkerInterface.h
 	dir_util.cpp

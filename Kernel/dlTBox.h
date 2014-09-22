@@ -39,6 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DataTypeCenter.h"
 #include "tProgressMonitor.h"
 #include "tKBFlags.h"
+#include "tSplitVars.h"
+#include "tSplitExpansionRules.h"
 
 class DlSatTester;
 class Taxonomy;
@@ -210,6 +212,10 @@ protected:	// members
 	TSimpleRules SimpleRules;
 		/// map to show the possible equivalence between individuals
 	std::map<TConcept*, std::pair<TIndividual*,bool> > SameI;
+		/// split rules
+	TSplitRules SplitRules;
+		/// set of split vars
+	TSplitVars* Splits;
 		/// map from A->C for axioms A [= C where A = D is in the TBox
 	ConceptDefMap ExtraConceptDefs;
 
@@ -264,6 +270,8 @@ protected:	// members
 	bool useAnywhereBlocking;
 		/// flag to use caching during completion tree construction
 	bool useNodeCache;
+		/// let reasoner know that we are in the classificaton (for splits)
+	bool duringClassification;
 		/// how many nodes skip before block; work only with FAIRNESS
 	int nSkipBeforeBlock;
 
@@ -453,6 +461,8 @@ protected:	// methods
 			addConceptToHeap(p);
 		return p->resolveId();
 	}
+		/// transform splitted concept registered in SPLIT to a dag representation
+	void split2dag ( TSplitVar* split );
 
 //-----------------------------------------------------------------------------
 //--		internal parser (input) interface
@@ -547,6 +557,15 @@ protected:	// methods
 
 		/// init Range and Domain for all roles of RM; sets hasGCI if R&D was found
 	void initRangeDomain ( RoleMaster& RM );
+		/// build up split rules for reasoners; create them after DAG is build
+	void buildSplitRules ( void )
+	{
+		if ( !getSplits()->empty() )
+		{
+			SplitRules.createSplitRules(getSplits());
+			SplitRules.initEntityMap(DLHeap);
+		}
+	}
 
 		/// set told TOP concept whether necessary
 	void initToldSubsumers ( void )
@@ -1173,6 +1192,10 @@ public:
 
 		/// get (READ-WRITE) access to internal Taxonomy of concepts
 	Taxonomy* getTaxonomy ( void ) { return pTax; }
+		/// get RW access to the splits
+	TSplitVars* getSplits ( void ) { return Splits; }
+		/// set split vars
+	void setSplitVars ( TSplitVars* s ) { Splits = s; }
 
 		/// set given structure as a progress monitor
 	void setProgressMonitor ( TProgressMonitor* pMon ) { pMonitor = pMon; }

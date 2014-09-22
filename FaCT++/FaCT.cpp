@@ -276,6 +276,9 @@ int main ( int argc, char *argv[] )
 	// dump ontology if requested
 	Kernel.setDumpOntology(Kernel.getOptions()->getBool("dumpOntology"));
 
+	// set axiom splitting value
+	Kernel.setAxiomSplitting(Kernel.getOptions()->getBool("useAxiomSplitting"));
+
 	// Load the ontology
 	DLLispParser TBoxParser ( &iTBox, &Kernel );
 	Kernel.setVerboseOutput(true);

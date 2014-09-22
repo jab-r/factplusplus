@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TaxonomyCreator.h"
 #include "dlTBox.h"
 #include "tProgressMonitor.h"
+#include "tSplitVars.h"
 
 /// Taxonomy of named DL concepts (and mapped individuals)
 class DLConceptTaxonomy: public TaxonomyCreator
@@ -101,6 +102,8 @@ protected:	// members
 
 		/// flag to use Bottom-Up search
 	bool flagNeedBottomUp;
+		/// flag shows that subsumption check could be simplified
+	bool inSplitCheck;
 
 protected:	// methods
 	//-----------------------------------------------------------------
@@ -139,6 +142,9 @@ protected:	// methods
 		// if bottom-up search and CUR is not a successor of checking entity -- return false
 		if ( unlikely(upDirection && !cur->isCommon()) )
 			return false;
+		// for top-down search it's enough to look at defined concepts and non-det ones
+// 		if ( likely(!inSplitCheck && !upDirection) && !possibleSub(cur) )
+//			return false;
 		if ( unlikely ( useCandidates && candidates.find(cur) == candidates.end() ) )
 			return false;
 		return enhancedSubs1(cur);
@@ -237,6 +243,19 @@ protected:	// methods
 		/// @return true iff curEntry is classified as a synonym
 	bool classifySynonym ( void ) override;
 
+		/// merge vars came from a given SPLIT together
+	void mergeSplitVars ( TSplitVar* split );
+		/// merge a single vertex V to a node represented by CUR
+	void mergeVertex ( TaxonomyVertex* cur, TaxonomyVertex* v, const std::set<TaxonomyVertex*>& excludes )
+	{
+		if ( likely ( cur != v ) )
+		{
+			cur->mergeIndepNode ( v, excludes, curEntry );
+			pTax->removeNode(v);
+		}
+	}
+		/// after merging, check whether there are extra neighbours that should be taken into account
+	void checkExtraParents ( void );
 		/// check if it is necessary to log taxonomy action
 	bool needLogging ( void ) const override { return true; }
 
@@ -256,6 +275,7 @@ public:		// interface
 		, nSortedNegative(0)
 		, nModuleNegative(0)
 		, pTaxProgress(nullptr)
+		, inSplitCheck(false)
 	{
 	}
 		/// no copy c'tor
@@ -263,6 +283,12 @@ public:		// interface
 		/// no assignment
 	DLConceptTaxonomy& operator = ( const DLConceptTaxonomy& ) = delete;
 
+		/// process all splits
+	void processSplits ( void )
+	{
+		for ( TSplitVars::iterator p = tBox.Splits->begin(), p_end = tBox.Splits->end(); p != p_end; ++p )
+			mergeSplitVars(*p);
+	}
 		/// set bottom-up flag
 	void setBottomUp ( const TKBFlags& GCIs ) { flagNeedBottomUp = (GCIs.isGCI() || (GCIs.isReflexive() && GCIs.isRnD())); }
 		/// reclassify taxonomy wrt changed sets

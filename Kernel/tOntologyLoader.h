@@ -82,6 +82,18 @@ protected:	// methods
 		}
 	}
 
+	void fillSplit ( TSplitVar* sv )
+	{
+		sv->C = kb.getConcept(sv->oldName->getName());
+		sv->C->setNonClassifiable();
+		for ( TSplitVar::iterator p = sv->begin(), p_end = sv->end(); p != p_end; ++p )
+		{
+			TConcept* C = kb.getConcept(p->name->getName());
+			C->setSystem();
+			p->C = C;
+		}
+	}
+
 public:		// visitor interface
 	void visit ( const TDLAxiomDeclaration& axiom ) override
 	{
@@ -385,6 +397,11 @@ public:		// interface
 	void visitOntology ( TOntology& ontology )
 	{
 		ontology.visitOntology(*this);
+
+		for ( TSplitVars::iterator q = ontology.Splits.begin(), q_end = ontology.Splits.end(); q != q_end; ++q )
+			fillSplit(*q);
+		kb.setSplitVars(&ontology.Splits);
+
 		kb.finishLoading();
 	}
 }; // TOntologyLoader

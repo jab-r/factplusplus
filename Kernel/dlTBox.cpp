@@ -50,12 +50,14 @@ TBox :: TBox ( const ifOptionSet* Options, const std::string& TopORoleName, cons
 	, ORM ( /*data=*/false, TopORoleName, BotORoleName )
 	, DRM ( /*data=*/true, TopDRoleName, BotDRoleName )
 	, Axioms(*this)
+	, Splits(NULL)
 	, T_G(bpTOP)	// initialise GCA's concept with Top
 	, nC(0)
 	, nR(0)
 	, auxConceptID(0)
 	, testTimeout(0)
 	, useNodeCache(true)
+	, duringClassification(false)
 	, useSortedReasoning(true)
 	, isLikeGALEN(false)	// just in case Relevance part would be omitted
 	, isLikeWINE(false)
@@ -612,6 +614,7 @@ void TBox :: PrintDagEntry ( std::ostream& o, BipolarPointer p ) const
 		return;
 
 	case dtAnd:
+	case dtSplitConcept:
 		o << " (" << v.getTagName();
 		for ( DLVertex::const_iterator q = v.begin(); q != v.end(); ++q )
 			PrintDagEntry ( o, *q );

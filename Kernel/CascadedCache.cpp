@@ -70,6 +70,7 @@ DlSatTester :: prepareCascadedCache ( BipolarPointer p )
 	switch ( v.Type() )
 	{
 	case dtTop:		// no need to put cache for this
+	case dtSplitConcept:	// no need to cache this
 		break;
 
 	case dtDataType:	// data things are checked by data reasoner
