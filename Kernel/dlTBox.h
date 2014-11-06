@@ -45,6 +45,7 @@ class Taxonomy;
 class DLConceptTaxonomy;
 class dumpInterface;
 class TSignature;
+class TimeMetricsHelper;
 class SaveLoadManager;
 
 /// enumeration for the reasoner status
@@ -223,6 +224,9 @@ protected:	// members
 
 		/// maps from concept index to concept itself
 	ConceptVector ConceptMap;
+
+		/// time metrics
+	TimeMetricsHelper* tmHelper;
 
 		/// number of concepts and individuals; used to set index for modelCache
 	unsigned int nC;
@@ -910,6 +914,7 @@ protected:	// methods
 public:
 		/// init c'tor
 	TBox ( const ifOptionSet* Options,
+		   TimeMetricsHelper* helper,
 		   const std::string& TopORoleName,
 		   const std::string& BotORoleName,
 		   const std::string& TopDRoleName,

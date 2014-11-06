@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DLConceptTaxonomy.h"
 #include "globaldef.h"
 #include "logging.h"
+#include "TimeMetricsHelper.h"
 
 /********************************************************\
 |* 			Implementation of class Taxonomy			*|
@@ -487,12 +488,18 @@ void TBox :: createTaxonomy ( bool needIndividual )
 		pTaxCreator->setProgressIndicator(pMonitor);
 	}
 
+	// mark the start of classification
+	tmHelper->markStage ( /*consistency=*/false, /*start=*/true );
+
 //	sort ( arrayCD.begin(), arrayCD.end(), TSDepthCompare() );
 	classifyConcepts ( arrayCD, true, "completely defined" );
 //	sort ( arrayNoCD.begin(), arrayNoCD.end(), TSDepthCompare() );
 	classifyConcepts ( arrayNoCD, false, "regular" );
 //	sort ( arrayNP.begin(), arrayNP.end(), TSDepthCompare() );
 	classifyConcepts ( arrayNP, false, "non-primitive" );
+
+	// mark the end of of classification
+	tmHelper->markStage ( /*consistency=*/false, /*start=*/false );
 
 	if ( pMonitor )
 	{
@@ -510,6 +517,10 @@ void TBox :: createTaxonomy ( bool needIndividual )
 		Status = kbClassified;
 	if ( needIndividual )
 		Status = kbRealised;
+
+	// Time Metrics are not necessary, so delete them
+	delete tmHelper;
+	tmHelper = NULL;
 
 	if ( verboseOutput/* && needIndividual*/ )
 	{

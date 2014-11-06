@@ -141,6 +141,8 @@ set(SOURCE_FILES
 	tExpressionTranslator.h
 	tFastSet.h
 	tHeadTailCache.h
+	TimeMetricsHelper.cpp
+	TimeMetricsHelper.h
 	tIndividual.h
 	tKBFlags.h
 	tLabeller.h
