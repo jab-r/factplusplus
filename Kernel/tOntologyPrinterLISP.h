@@ -108,13 +108,6 @@ public:		// interface
 	TLISPOntologyPrinter ( std::ostream& o_ ) : o(o_), LEP(o_) {}
 	virtual ~TLISPOntologyPrinter ( void ) {}
 	void recordDataRole ( const char* name ) { o << "(defdatarole " << name << ")\n"; }
-
-	virtual void visitOntology ( TOntology& ontology )
-	{
-		for ( TOntology::iterator p = ontology.begin(), p_end = ontology.end(); p < p_end; ++p )
-			(*p)->accept(*this);
-		o << std::endl;
-	}
 }; // TLISPOntologyPrinter
 
 #endif

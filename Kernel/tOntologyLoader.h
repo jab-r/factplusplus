@@ -1,5 +1,5 @@
 /* This file is part of the FaCT++ DL reasoner
-Copyright (C) 2003-2012 by Dmitry Tsarkov
+Copyright (C) 2003-2015 by Dmitry Tsarkov
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -383,12 +383,9 @@ public:		// interface
 	virtual ~TOntologyLoader ( void ) {}
 
 		/// load ontology to a given KB
-	virtual void visitOntology ( TOntology& ontology )
+	void visitOntology ( TOntology& ontology )
 	{
-		for ( TOntology::iterator p = ontology.begin(), p_end = ontology.end(); p < p_end; ++p )
-			if ( (*p)->isUsed() )
-				(*p)->accept(*this);
-
+		ontology.visitOntology(*this);
 		kb.finishLoading();
 	}
 }; // TOntologyLoader
