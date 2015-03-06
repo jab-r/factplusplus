@@ -284,7 +284,7 @@ bool DlSatTester :: commonTacticBodyOr ( const DLVertex& cur )	// for C \or D co
 		if ( planOrProcessing ( cur, dep ) )
 		{	// found existing component
 			if ( LLM.isWritable(llGTA) )
-				LL << " E(" << OrConceptsToTest.back() << ")";
+				LL << " E(" << OrConceptsToTest.back().C << ")";
 			return false;
 		}
 		if ( OrConceptsToTest.empty() )
@@ -296,14 +296,14 @@ bool DlSatTester :: commonTacticBodyOr ( const DLVertex& cur )	// for C \or D co
 			// not a branching: just add a single concept
 		if ( OrConceptsToTest.size() == 1 )
 		{
-			BipolarPointer C = OrConceptsToTest.back();
+			BipolarPointer C = OrConceptsToTest.back().C;
 			return insertToDoEntry ( curNode, ConceptWDep(C,dep), DLHeap[C].Type(), "bcp" );
 		}
 
 		// more than one alternative: use branching context
 		createBCOr();
 		bContext->branchDep = dep;
-		static_cast<BCOr*>(bContext)->applicableOrEntries.swap(OrConceptsToTest);
+		static_cast<BCOr*>(bContext)->setOrIndex(OrConceptsToTest);
 	}
 
 	// now it is OR case with 1 or more applicable concepts
@@ -328,10 +328,11 @@ bool DlSatTester :: planOrProcessing ( const DLVertex& cur, DepSet& dep )
 			continue;
 		case acrExist:	// already have such concept -- save it to the 1st position
 			OrConceptsToTest.resize(1);
-			OrConceptsToTest[0] = C;
+			OrConceptsToTest[0].initFree(C);
 			return true;
 		case acrDone:
-			OrConceptsToTest.push_back(C);
+			OrConceptsToTest.push_back(BCOr::OrArg());
+			OrConceptsToTest.back().initFree(C);
 			continue;
 		default:		// safety check
 			fpp_unreachable();
@@ -346,7 +347,7 @@ bool DlSatTester :: processOrEntry ( void )
 	// save the context here as after save() it would be lost
 	const BCOr* bcOr = static_cast<BCOr*>(bContext);
 	BCOr::or_iterator p = bcOr->orBeg(), p_end = bcOr->orCur();
-	BipolarPointer C = *p_end;
+	BipolarPointer C = p_end->C;
 	const char* reason = nullptr;
 	DepSet dep;
 
@@ -371,7 +372,7 @@ bool DlSatTester :: processOrEntry ( void )
 	// if semantic branching is in use -- add previous entries to the label
 	if ( useSemanticBranching() )
 		for ( ; p < p_end; ++p )
-			if ( addToDoEntry ( curNode, ConceptWDep(inverse(*p),dep), "sb" ) )
+			if ( addToDoEntry ( curNode, ConceptWDep(inverse(p->C),dep), "sb" ) )
 				fpp_unreachable();	// Both Exists and Clash are errors
 
 	// add new entry to current node
