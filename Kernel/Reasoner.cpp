@@ -203,7 +203,7 @@ DlSatTester :: insertToDoEntry ( DlCompletionTree* node, const ConceptWDep& C,
 								 DagTag tag, const char* reason = nullptr )
 {
 	// we will change current Node => save it if necessary
-	updateLevel ( node, C.getDep() );
+	updateBranchingLevel ( node, C.getDep() );
 	CGraph.addConceptToNode ( node, C, CGLabel::isComplexConcept(tag) );
 
 	auto bp = C.bp();

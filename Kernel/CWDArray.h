@@ -130,7 +130,9 @@ public:		// interface
 		/// save label using given SS
 	void save ( SaveState& ss ) const { ss.ep = Base.size(); }
 		/// restore label to given LEVEL using given SS
-	void restore ( const SaveState& ss, unsigned int level );
+	void restore ( const SaveState& ss ) { Base.resize(ss.ep); }
+		/// discard all concepts that depend on LEVEL (DBT)
+	void discardBranching ( unsigned int level );
 
 	//----------------------------------------------
 	// Output

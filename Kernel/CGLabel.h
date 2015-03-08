@@ -173,10 +173,16 @@ public:		// interface
 		ccLabel.save(ss.cc);
 	}
 		/// restore label to given LEVEL using given SS
-	void restore ( const SaveState& ss, unsigned int level )
+	void restore ( const SaveState& ss )
 	{
-		scLabel.restore(ss.sc,level);
-		ccLabel.restore(ss.cc,level);
+		scLabel.restore(ss.sc);
+		ccLabel.restore(ss.cc);
+	}
+		/// discard all concepts that depend on LEVEL (DBT)
+	void discardBranching ( unsigned int level )
+	{
+		scLabel.discardBranching(level);
+		ccLabel.discardBranching(level);
 	}
 
 	//----------------------------------------------
