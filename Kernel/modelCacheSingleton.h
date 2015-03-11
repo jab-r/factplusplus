@@ -1,5 +1,5 @@
 /* This file is part of the FaCT++ DL reasoner
-Copyright (C) 2003-2010 by Dmitry Tsarkov
+Copyright (C) 2003-2016 by Dmitry Tsarkov
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,11 @@ protected:	// members
 		/// the singleton itself
 	BipolarPointer Singleton;
 
-public:
+protected:	// methods
+		/// log a particular implementation of a cache entry
+	virtual void logCacheEntryImpl ( void ) const { LL << "\nSingleton cache: element " << getValue(); }
+
+public:		// interface
 		/// c'tor: no nominals can be here
 	modelCacheSingleton ( BipolarPointer bp )
 		: modelCacheInterface(/*flagNominals=*/false)
@@ -72,14 +76,6 @@ public:
 	}
 		/// Get the tag identifying the cache type
 	virtual modelCacheType getCacheType ( void ) const { return mctSingleton; }
-#ifdef _USE_LOGGING
-		/// log this cache entry (with given level)
-	virtual void logCacheEntry ( unsigned int level ) const
-	{
-		if ( LLM.isWritable(level) )
-			LL << "\nSingleton cache: element " << getValue();
-	}
-#endif
 }; // modelCacheSingleton
 
 #endif
