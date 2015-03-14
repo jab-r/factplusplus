@@ -45,6 +45,7 @@ DlSatTester :: DlSatTester ( TBox& tbox )
 	, GCIs(tbox.GCIs)
 	, bContext(nullptr)
 	, tryLevel(InitBranchingLevelValue)
+	, maxLevel(InitBranchingLevelValue)
 	, nonDetShift(0)
 	, curNode(nullptr)
 	, dagSize(0)
@@ -76,6 +77,7 @@ DlSatTester :: prepareReasoner ( void )
 	curNode = nullptr;
 	bContext = nullptr;
 	tryLevel = InitBranchingLevelValue;
+	maxLevel = InitBranchingLevelValue;
 
 	// clear last session information
 	resetSessionFlags();
@@ -562,7 +564,10 @@ void DlSatTester :: save ( void )
 	TODO.save();
 
 	// increase tryLevel
-	++tryLevel;
+	if ( RKG_USE_DYNAMIC_BACKJUMPING )
+		tryLevel = ++maxLevel;
+	else
+		++tryLevel;
 	Manager.ensureLevel(getCurLevel());
 
 	// init BC
@@ -607,28 +612,28 @@ void DlSatTester :: restore ( unsigned int newTryLevel )
 void
 DlSatTester :: restoreDBT ( void )
 {
-	unsigned int retLevel = getClashSet().level();
+	setCurLevel(getClashSet().level());
 	// restore local
-	bContext = Stack.get(retLevel);
+	bContext = Stack.get(getCurLevel());
 	BCOr* bcOr = dynamic_cast<BCOr*>(bContext);
 	// restore reasoning context
 	curNode = bContext->curNode;
 	curConcept = bContext->curConcept;
 	// we here after the clash so choose the next branching option
-	bcOr->failCurOption(getClashSet(), retLevel);
+	bcOr->failCurOption(getClashSet(), getCurLevel());
 	// clear all conflict sets that involve retLevel
-	std::cerr << "Remove conflict level " << retLevel << " from branching\n";
-	for ( unsigned int i = retLevel+1; i < Stack.size(); ++i )
-		dynamic_cast<BCOr*>(Stack.get(i))->clearDep(retLevel);
+	std::cerr << "Remove conflict level " << getCurLevel() << " from branching\n";
+	for ( unsigned int i = getCurLevel()+1; i < Stack.size(); ++i )
+		dynamic_cast<BCOr*>(Stack.get(i))->clearDep(getCurLevel());
 	// clear all labels depending on retLevel
-	CGraph.discardBranching(retLevel);
+	CGraph.discardBranching(getCurLevel());
 
 	//nextBranchingOption();
 	incStat(nStateRestores);
 
 	if ( LLM.isWritable(llSRState) )
 		LL << " sr(" << getCurLevel() << ")";
-	writeRoot(llSRState);
+//	writeRoot(llSRState);
 }
 
 /**
