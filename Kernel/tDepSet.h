@@ -1,5 +1,5 @@
 /* This file is part of the FaCT++ DL reasoner
-Copyright (C) 2006-2014 by Dmitry Tsarkov
+Copyright (C) 2006-2015 by Dmitry Tsarkov
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define TDEPSET_H
 
 #include <map>
-#include <iostream>
+#include <cstdlib>	// NULL
 
 #include "fpp_assert.h"
 #include "growingArrayP.h"
@@ -242,7 +242,7 @@ public:		// interface
 			clear();
 	}
 
-		/// Print given dep-set to a standart stream
+		/// Print given dep-set to a standard stream
 	template <class O>
 	void Print ( O& o ) const
 	{

@@ -1,5 +1,5 @@
 /* This file is part of the FaCT++ DL reasoner
-Copyright (C) 2003-2014 by Dmitry Tsarkov
+Copyright (C) 2003-2015 by Dmitry Tsarkov
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -117,4 +117,14 @@ void TaxonomyVertex :: printNeighbours ( std::ostream& o, bool upDirection ) con
 		o << " \"" << (*p)->getPrimer()->getName() << '"';
 
 	o << "}";
+}
+
+/// print taxonomy vertex in format <equals parents children>
+void
+TaxonomyVertex :: print ( std::ostream& o ) const
+{
+	printSynonyms(o);
+	printNeighbours ( o, true );
+	printNeighbours ( o, false );
+	o << "\n";
 }
