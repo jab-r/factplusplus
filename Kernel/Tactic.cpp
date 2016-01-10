@@ -644,7 +644,7 @@ bool DlSatTester :: commonTacticBodyValue ( const TRole* R, const TIndividual* n
 		CGraph.addRoleLabel ( curNode, realNode, /*linkToParent=*/false, R, dep );
 
 	// add all necessary concepts to both ends of the edge
-	return setupEdge ( edge, dep, redoForall|redoFunc|redoAtMost|redoIrr );
+	return setupEdge ( edge, dep, redoEverything );
 }
 
 bool
@@ -669,7 +669,7 @@ DlSatTester :: commonTacticBodySomeUniv ( const DLVertex& cur )
 //	Support for SOME processing
 //-------------------------------------------------------------------------------
 
-bool DlSatTester :: createNewEdge ( const TRole* R, BipolarPointer C, unsigned int flags )
+bool DlSatTester :: createNewEdge ( const TRole* R, BipolarPointer C, unsigned int redoFlags )
 {
 	const DepSet& dep = curConcept.getDep();
 
@@ -683,7 +683,7 @@ bool DlSatTester :: createNewEdge ( const TRole* R, BipolarPointer C, unsigned i
 	DlCompletionTreeArc* pA = createOneNeighbour ( R, dep );
 
 	// add necessary label
-	return initNewNode ( pA->getArcEnd(), dep, C ) || setupEdge ( pA, dep, flags );
+	return initNewNode ( pA->getArcEnd(), dep, C ) || setupEdge ( pA, dep, redoFlags );
 }
 
 /// create new ROLE-neighbour to curNode; return edge to it
@@ -756,7 +756,7 @@ DlSatTester :: applyAllGeneratingRules ( DlCompletionTree* node )
 }
 
 bool
-DlSatTester :: setupEdge ( DlCompletionTreeArc* pA, const DepSet& dep, unsigned int flags )
+DlSatTester :: setupEdge ( DlCompletionTreeArc* pA, const DepSet& dep, unsigned int redoFlags )
 {
 	DlCompletionTree* child = pA->getArcEnd();
 	DlCompletionTree* from = pA->getReverse()->getArcEnd();
@@ -766,11 +766,15 @@ DlSatTester :: setupEdge ( DlCompletionTreeArc* pA, const DepSet& dep, unsigned 
 	switchResult ( initHeadOfNewEdge ( child, pA->getReverse()->getRole(), dep, "RR" ) );
 
 	// check if we have any AR.X concepts in current node
-	switchResult ( applyUniversalNR ( from, pA, dep, flags ) );
+	if ( redoFlags != 0 )
+		switchResult ( applyUniversalNR ( from, pA, dep, redoFlags ) );
 
 	// for nominal children and loops -- just apply things for the inverses
 	if ( pA->isPredEdge() || child->isNominalNode() || child == from )
-		switchResult ( applyUniversalNR ( child, pA->getReverse(), dep, flags ) );
+	{
+		if ( redoFlags != 0 )
+			switchResult ( applyUniversalNR ( child, pA->getReverse(), dep, redoFlags ) );
+	}
 	else
 	{
 		if ( child->isDataNode() )
@@ -788,10 +792,10 @@ DlSatTester :: setupEdge ( DlCompletionTreeArc* pA, const DepSet& dep, unsigned 
 
 bool DlSatTester :: applyUniversalNR ( DlCompletionTree* Node,
 											  const DlCompletionTreeArc* arcSample,
-											  const DepSet& dep_, unsigned int flags )
+											  const DepSet& dep_, unsigned int redoFlags )
 {
 	// check whether a flag is set
-	if ( flags == 0 )
+	if ( redoFlags == 0 )
 		return false;
 
 	const TRole* R = arcSample->getRole();
@@ -810,13 +814,13 @@ bool DlSatTester :: applyUniversalNR ( DlCompletionTree* Node,
 		switch ( v.Type() )
 		{
 		case dtIrr:
-			if ( flags & redoIrr )
+			if ( redoFlags & redoIrr )
 				switchResult ( checkIrreflexivity ( arcSample, vR, dep ) );
 			break;
 
 		case dtForall:
 		{
-			if ( (flags & redoForall) == 0 )
+			if ( (redoFlags & redoForall) == 0 )
 				break;
 			if ( unlikely(vR->isTop()) )
 				break;
@@ -836,11 +840,11 @@ bool DlSatTester :: applyUniversalNR ( DlCompletionTree* Node,
 		case dtLE:
 			if ( isFunctionalVertex(v) )
 			{
-				if ( (flags & redoFunc) && (*vR >= *R) )
+				if ( (redoFlags & redoFunc) && (*vR >= *R) )
 					addExistingToDoEntry ( Node, Node->label().getCCOffset(p), "f" );
 			}
 			else
-				if ( (flags & redoAtMost) && (*vR >= *R) )
+				if ( (redoFlags & redoAtMost) && (*vR >= *R) )
 					addExistingToDoEntry ( Node, Node->label().getCCOffset(p), "le" );
 			break;
 
@@ -1407,7 +1411,7 @@ bool DlSatTester :: Merge ( DlCompletionTree* from, DlCompletionTree* to, const 
 
 	// for every node added to TO, every ALL, Irr and <=-node should be checked
 	for ( q = edges.begin(); q != q_end; ++q )
-		switchResult ( applyUniversalNR ( to, *q, depF, redoForall|redoFunc|redoAtMost|redoIrr ) );
+		switchResult ( applyUniversalNR ( to, *q, depF, redoEverything ) );
 
 	// we do real action here, so the return value
 	return false;
@@ -1627,7 +1631,7 @@ bool DlSatTester :: commonTacticBodySomeSelf ( const TRole* R )
 	// create an R-loop through curNode
 	const DepSet& dep = curConcept.getDep();
 	DlCompletionTreeArc* pA = CGraph.createLoop ( curNode, R, dep );
-	return setupEdge ( pA, dep, redoForall|redoFunc|redoAtMost|redoIrr );
+	return setupEdge ( pA, dep, redoEverything );
 }
 
 bool DlSatTester :: commonTacticBodyIrrefl ( const TRole* R )
@@ -1699,5 +1703,5 @@ bool DlSatTester :: checkProjection ( DlCompletionTreeArc* pA, BipolarPointer C,
 	// here C is in the label of curNode: add ProjR to the edge if necessary
 	DlCompletionTree* child = pA->getArcEnd();
 	pA = CGraph.addRoleLabel ( curNode, child, pA->isPredEdge(), ProjR, dep );
-	return setupEdge ( pA, dep, redoForall|redoFunc|redoAtMost|redoIrr );
+	return setupEdge ( pA, dep, redoEverything );
 }

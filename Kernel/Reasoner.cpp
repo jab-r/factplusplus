@@ -437,7 +437,7 @@ bool DlSatTester :: applyReflexiveRoles ( DlCompletionTree* node, const DepSet& 
 	{
 		// create R-loop through the NODE
 		DlCompletionTreeArc* pA = CGraph.addRoleLabel ( node, node, /*isPredEdge=*/false, *p, dep );
-		if ( setupEdge ( pA, dep, 0 ) )
+		if ( setupEdge ( pA, dep ) )
 			return true;
 	}
 
