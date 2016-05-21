@@ -1,5 +1,5 @@
 /* This file is part of the FaCT++ DL reasoner
-Copyright (C) 2005-2008 by Dmitry Tsarkov
+Copyright (C) 2005-2016 by Dmitry Tsarkov
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -16,8 +16,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _FLAGS_H
-#define _FLAGS_H
+#ifndef FLAGS_H
+#define FLAGS_H
 
 /// class for carrying different flags; real users shall inherit from it
 class Flags
@@ -28,7 +28,7 @@ private:
 
 protected:	// methods for flags maintainance
 		/// get given flag value
-	bool getFlag ( unsigned int mask ) const { return flags & mask; }
+	bool getFlag ( unsigned int mask ) const { return (flags & mask) != 0; }
 		/// set given flag to 1
 	void setFlag ( unsigned int mask ) { flags |= mask; }
 		/// set given flag to 0

@@ -485,7 +485,7 @@ LoadSingleCache ( SaveLoadManager& m )
 		return new modelCacheSingleton(m.loadSInt());
 	case modelCacheInterface::mctIan:
 	{
-		bool hasNominals = bool(m.loadUInt());
+		bool hasNominals = m.loadUInt() > 0;
 		unsigned int nC = m.loadUInt();
 		unsigned int nR = m.loadUInt();
 		modelCacheIan* cache = new modelCacheIan ( hasNominals, nC, nR );

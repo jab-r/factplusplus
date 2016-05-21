@@ -406,7 +406,7 @@ void TRole :: completeAutomaton ( TRoleSet& RInProcess )
 	if ( likely(!isBottom()) )	// FIXME!! for now; need better Top/Bot synonyms processing
 	for ( ClassifiableEntry::iterator p = told_begin(), p_end = told_end(); p != p_end; ++p )
 	{
-		TRole* R = static_cast<TRole*>(resolveSynonym(*p));
+		TRole* R = resolveSynonym(static_cast<TRole*>(*p));
 		if ( R->isTop() )	// do not propagate anything to a top-role
 			continue;
 		R->addSubRoleAutomaton(this);
