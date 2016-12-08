@@ -1,5 +1,5 @@
 /* This file is part of the FaCT++ DL reasoner
-Copyright (C) 2009-2012 by Dmitry Tsarkov
+Copyright (C) 2009-2015 by Dmitry Tsarkov
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -68,7 +68,7 @@ public:		// visitor interface
 	virtual void visit ( const TDLAxiomEquivalentConcepts& axiom ) { o << "(equal_c"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
 	virtual void visit ( const TDLAxiomDisjointConcepts& axiom ) { o << "(disjoint_c"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
 	virtual void visit ( const TDLAxiomDisjointUnion& axiom )
-		{ o << "(disjoint_c"; print ( axiom.begin(), axiom.end() ); o << ")\n(equal_c (or" << axiom.getC(); print ( axiom.begin(), axiom.end() ); o << "))\n"; }
+		{ o << "(disjoint_c"; print ( axiom.begin(), axiom.end() ); o << ")\n(equal_c" << axiom.getC() << " (or"; print ( axiom.begin(), axiom.end() ); o << "))\n"; }
 	virtual void visit ( const TDLAxiomEquivalentORoles& axiom ) { o << "(equal_r"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
 	virtual void visit ( const TDLAxiomEquivalentDRoles& axiom ) { o << "(equal_r"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
 	virtual void visit ( const TDLAxiomDisjointORoles& axiom ) { o << "(disjoint_r"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
