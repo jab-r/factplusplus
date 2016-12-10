@@ -3,22 +3,6 @@ GCC_OPT_OPT = -ffast-math -W -Wall -Wextra -O3 -fomit-frame-pointer -fPIC
 # -Wno-overloaded-virtual
 # the last one is for ExtendedSynLocChecker
 
-# GCC 3.3 optimisation options that are not included in -O3
-GCC_33_OPT = -ftracer -fgcse-sm
-# GCC 3.4 optimisation options that are not included in -O3
-GCC_34_OPT = $(GCC_33_OPT) -fgcse-las -fpeel-loops
-# GCC 4.0 optimisation options that are not included in -O3
-GCC_40_OPT = $(GCC_34_OPT) -fmodulo-sched -ftree-loop-linear -ftree-loop-im -fweb\
- -ftree-loop-ivcanon -fivopts -ftree-vectorize -fvariable-expansion-in-unroller
-# GCC 4.1 optimisation options that are not included in -O3
-GCC_41_OPT = $(GCC_40_OPT) -funsafe-loop-optimizations
-# GCC 4.2 optimisation options that are not included in -O3
-GCC_42_OPT = $(GCC_41_OPT)
-# GCC 4.3 optimisation options that are not included in -O3
-GCC_43_OPT = $(GCC_42_OPT) -fmodulo-sched-allow-regmoves -fipa-cp -fvect-cost-model
-# GCC 4.4 optimisation options that are not included in -O3
-GCC_44_OPT = $(GCC_43_OPT)
-
 # define architecture; it will affect file extentions, dynamic flags.
 # now LINUX, WINDOWS(untested), MACOSX are supported
 OS = MACOSX
