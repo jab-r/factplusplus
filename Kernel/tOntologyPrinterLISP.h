@@ -31,40 +31,51 @@ protected:	// members
 	std::ostream& o;
 		/// printer for the expressions
 	TLISPExpressionPrinter LEP;
+		/// if true, print declarations
+	bool printDeclarations;
+		/// if true, print logical axioms
+	bool printAxioms;
 
 protected:	// methods
 		/// helper to print several expressions in a row
 	template<class Expression>
 	TLISPOntologyPrinter& operator << ( const TDLNAryExpression<Expression>& c )
 	{
-		for ( typename TDLNAryExpression<Expression>::iterator p = c.begin(), p_end = c.end(); p != p_end; ++p )
-			(*p)->accept(LEP);
+		if (printAxioms)
+			for ( typename TDLNAryExpression<Expression>::iterator p = c.begin(), p_end = c.end(); p != p_end; ++p )
+				(*p)->accept(LEP);
 		return *this;
 	}
 		/// helper to print a string
-	TLISPOntologyPrinter& operator << ( const char* str ) { o << str; o.flush(); return *this; }
+	TLISPOntologyPrinter& operator << ( const char* str )
+	{
+		if (printAxioms)
+			o << str;
+		return *this;
+	}
 		/// helper to print an expression
-	TLISPOntologyPrinter& operator << ( const TDLExpression* expr ) { expr->accept(LEP); return *this; }
+	TLISPOntologyPrinter& operator << ( const TDLExpression* expr )
+	{
+		if (printAxioms)
+			expr->accept(LEP);
+		return *this;
+	}
 
 public:		// visitor interface
 	virtual void visit ( const TDLAxiomDeclaration& axiom )
 	{
-		const TDLExpression* decl = axiom.getDeclaration();
-		bool cname = dynamic_cast<const TDLConceptName*>(decl) != NULL;
-		bool iname = dynamic_cast<const TDLIndividualName*>(decl) != NULL;
-		bool rname = dynamic_cast<const TDLObjectRoleName*>(decl) != NULL;
-		bool dname = dynamic_cast<const TDLDataRoleName*>(decl) != NULL;
-
-		// do not print TOP/BOT/datatypes
-		if ( !cname && !iname && !rname && !dname )
+		if (!printDeclarations)
 			return;
-
-		*this << "(def" <<
-			(cname ? "primconcept" :
-			 iname ? "individual" :
-			 rname ? "primrole" :
-				    "datarole")
-			  << decl << ")\n";
+		const TDLExpression* decl = axiom.getDeclaration();
+		// print only declarations for non-constant entities, ignore datatypes
+		if (const TDLConceptName* concept = dynamic_cast<const TDLConceptName*>(decl))
+			o << "(defprimconcept " << concept->getName() << ")\n";
+		else if (const TDLIndividualName* individual = dynamic_cast<const TDLIndividualName*>(decl))
+			o << "(defindividual " << individual->getName() << ")\n";
+		else if (const TDLObjectRoleName* objectRole = dynamic_cast<const TDLObjectRoleName*>(decl))
+			o << "(defprimrole " << objectRole->getName() << ")\n";
+		else if (const TDLDataRoleName* dataRole = dynamic_cast<const TDLDataRoleName*>(decl))
+			o << "(defdatarole " << dataRole ->getName() << ")\n";
 	}
 
 	virtual void visit ( const TDLAxiomEquivalentConcepts& axiom ) { *this << "(equal_c" << axiom << ")\n"; }
@@ -107,8 +118,21 @@ public:		// visitor interface
 		{ *this << "(instance" << axiom.getIndividual() << " (all" << axiom.getAttribute() << "(not " << axiom.getValue() << ")))\n"; }
 
 public:		// interface
-	TLISPOntologyPrinter ( std::ostream& o_ ) : o(o_), LEP(o_) {}
+		/// init c'tor
+	TLISPOntologyPrinter ( std::ostream& o_ )
+		: o(o_)
+		, LEP(o_)
+		, printDeclarations(true)
+		, printAxioms(true)
+		{}
 	virtual ~TLISPOntologyPrinter ( void ) {}
+
+		/// instruct printer whether to print/ignore declarations and axioms
+	void setPrintFlags(bool declarations, bool axioms)
+	{
+		printDeclarations = declarations;
+		printAxioms = axioms;
+	}
 	void recordDataRole ( const char* name ) { o << "(defdatarole " << name << ")\n"; }
 }; // TLISPOntologyPrinter
 
