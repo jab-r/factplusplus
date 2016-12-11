@@ -34,11 +34,12 @@ protected:	// members
 
 protected:	// methods
 		/// helper to print several expressions in a row
-	template<class Iterator>
-	void print ( Iterator beg, Iterator end )
+	template<class Expression>
+	TLISPOntologyPrinter& operator << ( const TDLNAryExpression<Expression>& c )
 	{
-		for ( ; beg < end; ++beg )
-			(*beg)->accept(LEP);
+		for ( typename TDLNAryExpression<Expression>::iterator p = c.begin(), p_end = c.end(); p != p_end; ++p )
+			(*p)->accept(LEP);
+		return *this;
 	}
 		/// helper to print a string
 	TLISPOntologyPrinter& operator << ( const char* str ) { o << str; o.flush(); return *this; }
@@ -66,17 +67,17 @@ public:		// visitor interface
 			  << decl << ")\n";
 	}
 
-	virtual void visit ( const TDLAxiomEquivalentConcepts& axiom ) { o << "(equal_c"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
-	virtual void visit ( const TDLAxiomDisjointConcepts& axiom ) { o << "(disjoint_c"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
+	virtual void visit ( const TDLAxiomEquivalentConcepts& axiom ) { *this << "(equal_c" << axiom << ")\n"; }
+	virtual void visit ( const TDLAxiomDisjointConcepts& axiom ) { *this  << "(disjoint_c" << axiom << ")\n"; }
 	virtual void visit ( const TDLAxiomDisjointUnion& axiom )
-		{ o << "(disjoint_c"; print ( axiom.begin(), axiom.end() ); o << ")\n(equal_c" << axiom.getC() << " (or"; print ( axiom.begin(), axiom.end() ); o << "))\n"; }
-	virtual void visit ( const TDLAxiomEquivalentORoles& axiom ) { o << "(equal_r"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
-	virtual void visit ( const TDLAxiomEquivalentDRoles& axiom ) { o << "(equal_r"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
-	virtual void visit ( const TDLAxiomDisjointORoles& axiom ) { o << "(disjoint_r"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
-	virtual void visit ( const TDLAxiomDisjointDRoles& axiom ) { o << "(disjoint_r"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
-	virtual void visit ( const TDLAxiomSameIndividuals& axiom ) { o << "(same"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
-	virtual void visit ( const TDLAxiomDifferentIndividuals& axiom ) { o << "(different"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
-	virtual void visit ( const TDLAxiomFairnessConstraint& axiom ) { o << "(fairness"; print ( axiom.begin(), axiom.end() ); o << ")\n"; }
+		{ *this << "(disjoint_c" << axiom << ")\n(equal_c" << axiom.getC() << " (or" << axiom << "))\n"; }
+	virtual void visit ( const TDLAxiomEquivalentORoles& axiom ) { *this << "(equal_r" << axiom << ")\n"; }
+	virtual void visit ( const TDLAxiomEquivalentDRoles& axiom ) { *this << "(equal_r" << axiom << ")\n"; }
+	virtual void visit ( const TDLAxiomDisjointORoles& axiom ) { *this << "(disjoint_r" << axiom << ")\n"; }
+	virtual void visit ( const TDLAxiomDisjointDRoles& axiom ) { *this << "(disjoint_r" << axiom << ")\n"; }
+	virtual void visit ( const TDLAxiomSameIndividuals& axiom ) { *this << "(same" << axiom << ")\n"; }
+	virtual void visit ( const TDLAxiomDifferentIndividuals& axiom ) { *this << "(different" << axiom << ")\n"; }
+	virtual void visit ( const TDLAxiomFairnessConstraint& axiom ) { *this << "(fairness" << axiom << ")\n"; }
 
 	virtual void visit ( const TDLAxiomRoleInverse& axiom ) { *this << "(equal_r" << axiom.getRole() << " (inv" << axiom.getInvRole() << "))\n"; }
 	virtual void visit ( const TDLAxiomORoleSubsumption& axiom ) { *this << "(implies_r" << axiom.getSubRole() << axiom.getRole() << ")\n"; }
