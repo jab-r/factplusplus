@@ -279,13 +279,13 @@ bool DlSatTester :: commonTacticBodyOr ( const DLVertex& cur )	// for C \or D co
 
 	incStat(nOrCalls);
 	std::cerr << "Computing disjunction "; cur.Print(std::cerr); std::cerr << "\n";
-	BCOr* orBranch = NULL;
+	BCOr* orBranch = nullptr;
 	if ( isFirstBranchCall() )	// check the structure of OR operation (number of applicable concepts)
 	{
 		std::cerr << "first call for it\n";
 		// check if such branch was there already
 		orBranch = Stack.get ( curNode, curConcept.bp() );
-		if ( orBranch == NULL )
+		if ( orBranch == nullptr )
 		{
 			std::cerr << "haven't seen before\n";
 			// gather BP information
@@ -342,7 +342,7 @@ bool DlSatTester :: commonTacticBodyOr ( const DLVertex& cur )	// for C \or D co
 	else
 		orBranch = dynamic_cast<BCOr*>(bContext);
 //	std::cerr << "Stack size is " << Stack.size() << "\n";
-	fpp_assert ( orBranch != NULL );
+	fpp_assert ( orBranch != nullptr );
 	// check clash
 	if ( orBranch->noMoreOptions() )
 	{

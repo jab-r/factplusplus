@@ -624,7 +624,7 @@ void
 DlSatTester :: restoreDBT ( void )
 {
 	std::cerr << "---\nRestore: conflictSet = ";
-	getClashSet().Print(std::cerr);
+	getClashSet().print(std::cerr);
 	setCurLevel(getClashSet().level());
 	std::cerr << "\nReturn level " << getCurLevel() << ", total " << Stack.size()-1 << "\n";
 	// restore local

@@ -230,7 +230,7 @@ protected:	// classes
 			if ( ret != obcMap.end() )
 				return ret->second;
 			else
-				return NULL;
+				return nullptr;
 		}
 			/// return new Or BC
 		BCOr* createOrBC ( unsigned int level )
@@ -666,7 +666,7 @@ protected:	// methods
 	void initBC ( void )
 	{
 		// save reasoning context
-		fpp_assert ( bContext != NULL );
+		fpp_assert ( bContext != nullptr );
 		bContext->curNode = curNode;
 		bContext->curConcept = curConcept;
 		bContext->branchDep = curConcept.getDep();

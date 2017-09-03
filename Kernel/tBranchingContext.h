@@ -20,6 +20,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef TBRANCHINGCONTEXT_H
 #define TBRANCHINGCONTEXT_H
 
+#include <iostream>
+
 #include "ConceptWithDep.h"
 
 class DlCompletionTree;
@@ -71,23 +73,18 @@ public:		// types
 	{
 	public:	// struct for now
 			/// argument itself
-		BipolarPointer C;
+		BipolarPointer C = bpINVALID;
 			/// argument negation
-		BipolarPointer NotC;
+		BipolarPointer NotC = bpINVALID;
 			/// dep-set representing clash reason
 		DepSet clashReason;
 			/// true iff this one is currently chosen
-		bool chosen;
+		bool chosen = false;
 			/// true iff currently available
-		bool free;
+		bool free = true;
 			/// true iff was chosen before and ruled out now
-		bool tried;
+		bool tried = false;
 	public:		// interface
-			/// empty c'tor
-		OrArg ( void ) : chosen(false), free(true), tried(false) {}
-			/// empty d'tor
-		~OrArg ( void ) {}
-
 			/// mark argument as tried
 		void setTried ( const DepSet& ds )
 		{
@@ -153,7 +150,7 @@ public:		// interface
 	{
 		orEntries.swap(index);
 		freeChoices = 0;
-		for ( int i = 0; i < orEntries.size(); i++ )
+		for ( size_t i = 0; i < orEntries.size(); i++ )
 			if ( orEntries[i].free )
 				++freeChoices;
 	}
@@ -161,7 +158,7 @@ public:		// interface
 	bool noMoreOptions ( void ) const { return freeChoices == 0; }
 	void gatherClashSet ( void )
 	{
-		for ( int i = 0; i < orEntries.size(); i++ )
+		for ( size_t i = 0; i < orEntries.size(); i++ )
 			branchDep.add(orEntries[i].clashReason);
 	}
 	BipolarPointer chooseFreeOption ( void )
@@ -192,9 +189,9 @@ public:		// interface
 				p->clashReason = dep;
 				p->clashReason.restrict(curLevel);
 				std::cerr << "BC-" << level << ", add ";
-				p->clashReason.Print(std::cerr);
+				p->clashReason.print(std::cerr);
 				std::cerr << " (from ";
-				dep.Print(std::cerr);
+				dep.print(std::cerr);
 				std::cerr << ") for alternative " << p->C << "\n";
 				return;
 			}
@@ -207,7 +204,7 @@ public:		// interface
 			if ( p->clashReason.contains(curLevel) )
 			{
 				std::cerr << "BC-" << level << ", clear ";
-				p->clashReason.Print(std::cerr);
+				p->clashReason.print(std::cerr);
 				std::cerr << " for alternative " << p->C << "\n";
 				p->clashReason.clear();
 				if ( p->tried )
@@ -233,7 +230,7 @@ public:		// interface
 			if ( p->chosen )
 			{
 				std::cerr << "BC-" << level << ", selection dependent on ";
-				ds.Print(std::cerr);
+				ds.print(std::cerr);
 				std::cerr << " for alternative " << p->C << "\n";
 				p->clashReason = ds;
 			}
@@ -269,10 +266,10 @@ public:		// interface
 				if ( p->clashReason.empty() )
 					o << "{}";
 				else
-					p->clashReason.Print(o);
+					p->clashReason.print(o);
 			}
 			else if ( p->chosen )
-				p->clashReason.Print(o);
+				p->clashReason.print(o);
 
 			o << " ";
 		}
